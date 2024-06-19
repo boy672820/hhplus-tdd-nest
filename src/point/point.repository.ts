@@ -7,11 +7,13 @@ export const POINT_REPOSITORY = Symbol();
 export class PointRepositoryImpl implements Repository<UserPoint> {
   constructor(private readonly userDb: UserPointTable) {}
 
-  findById(id: number): Promise<UserPoint> {
-    return this.userDb.selectById(id);
+  async findById(id: number): Promise<UserPoint> {
+    const result = await this.userDb.selectById(id);
+    return result;
   }
 
-  save(model: UserPoint): Promise<UserPoint> {
-    return this.userDb.insertOrUpdate(model.id, model.point);
+  async save(model: UserPoint): Promise<UserPoint> {
+    const result = await this.userDb.insertOrUpdate(model.id, model.point);
+    return result;
   }
 }
