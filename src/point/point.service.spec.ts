@@ -73,6 +73,9 @@ describe('PointService', () => {
       expect(pointRepository.save).toHaveBeenCalledWith(expected);
     });
 
+    /**
+     * 포인트를 충전에 성공했을 때 내역을 저장하는지 확인합니다.
+     */
     it('포인트를 충전하면 내역을 저장해야합니다.', async () => {
       await pointService.charge(1, 100);
 
@@ -102,6 +105,50 @@ describe('PointService', () => {
   });
 
   describe('포인트 사용', () => {
+    beforeEach(() => {
+      const userPoint: UserPoint = {
+        id: 1,
+        point: 100,
+        updateMillis: Date.now(),
+      };
+      jest
+        .spyOn(pointRepository, 'findById')
+        .mockReturnValue(Promise.resolve(userPoint));
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    /**
+     * 포인트가 정상적으로 차감되는지 확인합니다.
+     */
+    it('포인트를 사용하면 차감되어야 합니다.', async () => {
+      await pointService.use(1, 100);
+
+      const expected: UserPoint = {
+        id: 1,
+        point: 0,
+        updateMillis: expect.any(Number),
+      };
+      expect(pointRepository.save).toHaveBeenCalledWith(expected);
+    });
+
+    /**
+     * 포인트를 사용에 성공했을 때 내역을 저장하는지 확인합니다.
+     */
+    it('포인트를 사용하면 내역을 저장해야합니다.', async () => {
+      await pointService.use(1, 100);
+
+      const expected: HistoryCreateInput = {
+        userId: 1,
+        amount: 100,
+        type: TransactionType.USE,
+        timeMillis: expect.any(Number),
+      };
+      expect(historyRepository.create).toHaveBeenCalledWith(expected);
+    });
+
     /**
      * 사용할 포인트가 부족할 경우 예외를 발생시켜야 합니다.
      */

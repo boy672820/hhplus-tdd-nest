@@ -51,8 +51,14 @@ export class PointService {
     }
 
     userPoint.point -= point;
-    await this.pointRepository.save(userPoint);
     userPoint.updateMillis = Date.now();
+    await this.pointRepository.save(userPoint);
+    await this.historyRepository.create({
+      userId,
+      amount: point,
+      type: TransactionType.USE,
+      timeMillis: Date.now(),
+    });
     return userPoint;
   }
 }
