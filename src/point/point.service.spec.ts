@@ -1,17 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PointService } from './point.service';
-import { POINT_REPOSITORY } from './point.repository';
-import { MockRepository } from './mock.repository';
+import { POINT_REPOSITORY } from './repositories/point.repository';
+import { MockRepository } from './repositories/mock.repository';
 import {
   BadRequestException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { UserPoint } from './point.model';
-import { Repository } from './repository.interface';
+import { TransactionType, UserPoint } from './point.model';
+import { Repository } from './repositories/repository.interface';
+import {
+  HISTORY_REPOSITORY,
+  HistoryCreateInput,
+} from './repositories/history.repository';
+import { HistoryMockRepository } from './repositories/history.mock.repository';
 
 describe('PointService', () => {
   let pointService: PointService;
   let pointRepository: Repository<UserPoint>;
+  let historyRepository: HistoryMockRepository;
 
   beforeEach(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
@@ -21,11 +27,16 @@ describe('PointService', () => {
           provide: POINT_REPOSITORY,
           useClass: MockRepository,
         },
+        {
+          provide: HISTORY_REPOSITORY,
+          useClass: HistoryMockRepository,
+        },
       ],
     }).compile();
 
     pointService = moduleRef.get(PointService);
     pointRepository = moduleRef.get(POINT_REPOSITORY);
+    historyRepository = moduleRef.get(HISTORY_REPOSITORY);
   });
 
   it('should be defined', () => {
@@ -33,10 +44,7 @@ describe('PointService', () => {
   });
 
   describe('포인트 충전', () => {
-    /**
-     * 포인트가 정상적으로 충전되는지 확인합니다.
-     */
-    it('포인트를 충전할 수 있어야합니다.', async () => {
+    beforeEach(() => {
       const userPoint: UserPoint = {
         id: 1,
         point: 100,
@@ -44,8 +52,17 @@ describe('PointService', () => {
       };
       jest
         .spyOn(pointRepository, 'findById')
-        .mockReturnValueOnce(Promise.resolve(userPoint));
+        .mockReturnValue(Promise.resolve(userPoint));
+    });
 
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    /**
+     * 포인트가 정상적으로 충전되는지 확인합니다.
+     */
+    it('포인트를 충전할 수 있어야합니다.', async () => {
       await pointService.charge(1, 100);
 
       const expected: UserPoint = {
@@ -54,6 +71,18 @@ describe('PointService', () => {
         updateMillis: expect.any(Number),
       };
       expect(pointRepository.save).toHaveBeenCalledWith(expected);
+    });
+
+    it('포인트를 충전하면 내역을 저장해야합니다.', async () => {
+      await pointService.charge(1, 100);
+
+      const expected: HistoryCreateInput = {
+        userId: 1,
+        amount: 100,
+        type: TransactionType.CHARGE,
+        timeMillis: expect.any(Number),
+      };
+      expect(historyRepository.create).toHaveBeenCalledWith(expected);
     });
 
     /**

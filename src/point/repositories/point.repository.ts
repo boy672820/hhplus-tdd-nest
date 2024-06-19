@@ -1,5 +1,5 @@
-import { UserPointTable } from '../database/userpoint.table';
-import { UserPoint } from './point.model';
+import { UserPointTable } from '../../database/userpoint.table';
+import { UserPoint } from '../point.model';
 import { Repository } from './repository.interface';
 
 export const POINT_REPOSITORY = Symbol();

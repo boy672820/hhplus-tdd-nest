@@ -4,15 +4,21 @@ import {
   Injectable,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { Repository } from './repository.interface';
-import { UserPoint } from './point.model';
-import { POINT_REPOSITORY } from './point.repository';
+import { Repository } from './repositories/repository.interface';
+import { TransactionType, UserPoint } from './point.model';
+import { POINT_REPOSITORY } from './repositories/point.repository';
+import {
+  HISTORY_REPOSITORY,
+  HistoryRepository,
+} from './repositories/history.repository';
 
 @Injectable()
 export class PointService {
   constructor(
     @Inject(POINT_REPOSITORY)
     private readonly pointRepository: Repository<UserPoint>,
+    @Inject(HISTORY_REPOSITORY)
+    private readonly historyRepository: HistoryRepository,
   ) {}
 
   async charge(userId: number, point: number): Promise<UserPoint> {
@@ -22,8 +28,14 @@ export class PointService {
 
     const userPoint = await this.pointRepository.findById(userId);
     userPoint.point += point;
-    await this.pointRepository.save(userPoint);
     userPoint.updateMillis = Date.now();
+    await this.pointRepository.save(userPoint);
+    await this.historyRepository.create({
+      userId,
+      amount: point,
+      type: TransactionType.CHARGE,
+      timeMillis: Date.now(),
+    });
     return userPoint;
   }
 
