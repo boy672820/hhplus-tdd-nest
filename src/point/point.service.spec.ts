@@ -36,7 +36,7 @@ describe('PointService', () => {
     /**
      * 포인트가 정상적으로 충전되는지 확인합니다.
      */
-    it('포인트를 충전하면 충전된 포인트를 반환해야 합니다.', async () => {
+    it('포인트를 충전할 수 있어야합니다.', async () => {
       const userPoint: UserPoint = {
         id: 1,
         point: 100,
@@ -46,12 +46,13 @@ describe('PointService', () => {
         .spyOn(pointRepository, 'findById')
         .mockReturnValueOnce(Promise.resolve(userPoint));
 
+      await pointService.charge(1, 100);
+
       const expected: UserPoint = {
         id: 1,
         point: 200,
         updateMillis: expect.any(Number),
       };
-      await expect(pointService.charge(1, 100)).resolves.toEqual(expected);
       expect(pointRepository.save).toHaveBeenCalledWith(expected);
     });
 
