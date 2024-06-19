@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { Repository } from './repository.interface';
 import { UserPoint } from './point.model';
 import { POINT_REPOSITORY } from './point.repository';
@@ -17,6 +22,23 @@ export class PointService {
 
     const userPoint = await this.pointRepository.findById(userId);
     userPoint.point += point;
+    await this.pointRepository.save(userPoint);
+    userPoint.updateMillis = Date.now();
+    return userPoint;
+  }
+
+  async use(userId: number, point: number): Promise<UserPoint> {
+    if (point <= 0) {
+      throw new BadRequestException();
+    }
+
+    const userPoint = await this.pointRepository.findById(userId);
+
+    if (userPoint.point < point) {
+      throw new UnprocessableEntityException();
+    }
+
+    userPoint.point -= point;
     await this.pointRepository.save(userPoint);
     userPoint.updateMillis = Date.now();
     return userPoint;

@@ -56,7 +56,7 @@ describe('PointService', () => {
     });
 
     /**
-     * 충전할 포인트가 음수일 경우,
+     * 충전할 포인트가 0 이하일 경우,
      * 1. 잘못된 포인트 계산으로 인한 오류를 방지하기 위해 예외를 발생시켜야 합니다.
      * 2. 데이터 무결성을 위해 예외를 발생시켜야 합니다.
      * 3. 고의적으로 음수 포인트를 충전하여 다른 사용자의 포인트를 감소시키려는 시도가 있을 수 있습니다.
@@ -65,15 +65,41 @@ describe('PointService', () => {
       await expect(pointService.charge(1, -1)).rejects.toThrow(
         BadRequestException,
       );
-    });
-
-    /**
-     * 충전할 포인트가 0 이라면 의미가 없으므로 예외를 발생시켜야 합니다.
-     */
-    it('포인트가 0일 경우 예외를 발생시켜야 합니다.', async () => {
       await expect(pointService.charge(1, 0)).rejects.toThrow(
         BadRequestException,
       );
+    });
+  });
+
+  describe('포인트 사용', () => {
+    /**
+     * 사용할 포인트가 부족할 경우 예외를 발생시켜야 합니다.
+     */
+    it('포인트가 부족할 경우 사용할 수 없습니다.', async () => {
+      const userPoint: UserPoint = {
+        id: 1,
+        point: 100,
+        updateMillis: Date.now(),
+      };
+      jest
+        .spyOn(pointRepository, 'findById')
+        .mockReturnValueOnce(Promise.resolve(userPoint));
+
+      await expect(pointService.use(1, 200)).rejects.toThrow(
+        UnprocessableEntityException,
+      );
+    });
+
+    /**
+     * 사용할 포인트가 0 이하일 경우,
+     * 1. 잘못된 포인트 계산으로 인한 오류를 방지하기 위해 예외를 발생시켜야 합니다.
+     * 2. 데이터 무결성을 위해 예외를 발생시켜야 합니다.
+     */
+    it('포인트가 음수일 경우 예외를 발생시켜야 합니다.', async () => {
+      await expect(pointService.use(1, -1)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(pointService.use(1, 0)).rejects.toThrow(BadRequestException);
     });
   });
 });
