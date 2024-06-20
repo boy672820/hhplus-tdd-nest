@@ -21,6 +21,11 @@ export class PointService {
     private readonly historyRepository: HistoryRepository,
   ) {}
 
+  async findById(userId: number): Promise<UserPoint> {
+    const point = await this.pointRepository.findById(userId);
+    return point;
+  }
+
   async charge(userId: number, point: number): Promise<UserPoint> {
     if (point <= 0) {
       throw new BadRequestException();
@@ -29,13 +34,16 @@ export class PointService {
     const userPoint = await this.pointRepository.findById(userId);
     userPoint.point += point;
     userPoint.updateMillis = Date.now();
+
     await this.pointRepository.save(userPoint);
+
     await this.historyRepository.create({
       userId,
       amount: point,
       type: TransactionType.CHARGE,
       timeMillis: Date.now(),
     });
+
     return userPoint;
   }
 
@@ -52,13 +60,16 @@ export class PointService {
 
     userPoint.point -= point;
     userPoint.updateMillis = Date.now();
+
     await this.pointRepository.save(userPoint);
+
     await this.historyRepository.create({
       userId,
       amount: point,
       type: TransactionType.USE,
       timeMillis: Date.now(),
     });
+
     return userPoint;
   }
 }

@@ -10,11 +10,13 @@ import {
   HISTORY_REPOSITORY,
   HistoryRepositoryImpl,
 } from './repositories/history.repository';
+import { HistoryService } from './history.service';
 
 @Module({
   imports: [DatabaseModule],
   providers: [
     PointService,
+    HistoryService,
     {
       provide: POINT_REPOSITORY,
       useClass: PointRepositoryImpl,

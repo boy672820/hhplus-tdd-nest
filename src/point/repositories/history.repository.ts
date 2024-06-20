@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { PointHistoryTable } from '../../database/pointhistory.table';
 import { PointHistory, TransactionType } from '../point.model';
 import { Repository } from './repository.interface';
@@ -18,6 +19,7 @@ export abstract class HistoryRepository implements Repository<PointHistory> {
   abstract findAllByUserId(userId: number): Promise<PointHistory[]>;
 }
 
+@Injectable()
 export class HistoryRepositoryImpl extends HistoryRepository {
   constructor(private readonly historyDb: PointHistoryTable) {
     super();
