@@ -11,6 +11,7 @@ import {
   HISTORY_REPOSITORY,
   HistoryRepository,
 } from './repositories/history.repository';
+import { Transactional } from '../lib/decorators';
 
 @Injectable()
 export class PointService {
@@ -26,6 +27,7 @@ export class PointService {
     return point;
   }
 
+  @Transactional()
   async charge(userId: number, point: number): Promise<UserPoint> {
     if (point <= 0) {
       throw new BadRequestException();
@@ -47,6 +49,7 @@ export class PointService {
     return userPoint;
   }
 
+  @Transactional()
   async use(userId: number, point: number): Promise<UserPoint> {
     if (point <= 0) {
       throw new BadRequestException();
