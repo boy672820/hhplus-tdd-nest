@@ -1,6 +1,6 @@
 let mutex = Promise.resolve();
 
-export function Transactional() {
+export function WithLock() {
   return (
     _target: object,
     _propertyKey: string | symbol,
