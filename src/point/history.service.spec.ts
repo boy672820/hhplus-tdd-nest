@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HistoryService } from './history.service';
+import { HistoryService, HistoryServiceImpl } from './history.service';
 import { HistoryMockRepository } from './repositories/history.mock.repository';
 import { HISTORY_REPOSITORY } from './repositories/history.repository';
 import { PointHistory, TransactionType } from './point.model';
@@ -35,7 +35,10 @@ describe('HistoryService', () => {
   beforeEach(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       providers: [
-        HistoryService,
+        {
+          provide: HistoryService,
+          useClass: HistoryServiceImpl,
+        },
         {
           provide: HISTORY_REPOSITORY,
           useClass: HistoryMockRepository,

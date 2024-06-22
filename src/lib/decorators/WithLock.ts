@@ -1,4 +1,6 @@
-let mutex = Promise.resolve();
+import { Mutex } from 'async-mutex';
+
+const mutex = new Mutex();
 
 export function WithLock() {
   return (
@@ -8,12 +10,16 @@ export function WithLock() {
   ) => {
     const originalMethod = descriptor.value;
 
-    descriptor.value = function (...args: any[]) {
-      mutex = mutex.then(async () => {
+    descriptor.value = async function (...args: any[]) {
+      const release = await mutex.acquire();
+      try {
         const result = await originalMethod.apply(this, args);
         return result;
-      });
-      return mutex;
+      } catch (error) {
+        throw error;
+      } finally {
+        release();
+      }
     };
 
     return descriptor;

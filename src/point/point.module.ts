@@ -5,18 +5,24 @@ import {
   POINT_REPOSITORY,
   PointRepositoryImpl,
 } from './repositories/point.repository';
-import { PointService } from './point.service';
+import { PointService, PointServiceImpl } from './point.service';
 import {
   HISTORY_REPOSITORY,
   HistoryRepositoryImpl,
 } from './repositories/history.repository';
-import { HistoryService } from './history.service';
+import { HistoryService, HistoryServiceImpl } from './history.service';
 
 @Module({
   imports: [DatabaseModule],
   providers: [
-    PointService,
-    HistoryService,
+    {
+      provide: PointService,
+      useClass: PointServiceImpl,
+    },
+    {
+      provide: HistoryService,
+      useClass: HistoryServiceImpl,
+    },
     {
       provide: POINT_REPOSITORY,
       useClass: PointRepositoryImpl,

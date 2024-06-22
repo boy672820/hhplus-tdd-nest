@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PointService } from './point.service';
+import { PointService, PointServiceImpl } from './point.service';
 import { POINT_REPOSITORY } from './repositories/point.repository';
 import { MockRepository } from './repositories/mock.repository';
 import {
@@ -22,7 +22,10 @@ describe('PointService', () => {
   beforeEach(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       providers: [
-        PointService,
+        {
+          provide: PointService,
+          useClass: PointServiceImpl,
+        },
         {
           provide: POINT_REPOSITORY,
           useClass: MockRepository,

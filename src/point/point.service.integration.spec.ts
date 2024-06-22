@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PointService } from './point.service';
+import { PointService, PointServiceImpl } from './point.service';
 import { DatabaseModule } from '../database/database.module';
 import {
   POINT_REPOSITORY,
@@ -17,7 +17,10 @@ describe('PointService (Integration)', () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [DatabaseModule],
       providers: [
-        PointService,
+        {
+          provide: PointService,
+          useClass: PointServiceImpl,
+        },
         {
           provide: POINT_REPOSITORY,
           useClass: PointRepositoryImpl,

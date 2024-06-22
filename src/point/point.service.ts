@@ -13,8 +13,14 @@ import {
 } from './repositories/history.repository';
 import { WithLock } from '../lib/decorators';
 
+export abstract class PointService {
+  abstract findById(userId: number): Promise<UserPoint>;
+  abstract charge(userId: number, point: number): Promise<UserPoint>;
+  abstract use(userId: number, point: number): Promise<UserPoint>;
+}
+
 @Injectable()
-export class PointService {
+export class PointServiceImpl implements PointService {
   constructor(
     @Inject(POINT_REPOSITORY)
     private readonly pointRepository: Repository<UserPoint>,
