@@ -6,10 +6,10 @@ import {
   Patch,
   ValidationPipe,
 } from '@nestjs/common';
-import { PointHistory, UserPoint } from './point.model';
-import { PointBody as PointDto } from './point.dto';
-import { PointService } from './point.service';
-import { HistoryService } from './history.service';
+import { PointHistory, UserPoint } from '../../domain/models';
+import { PointBody as PointRequeset } from '../requests/point.dto';
+import { PointService } from '../../application/services/point.service';
+import { HistoryService } from '../../application/services/history.service';
 
 @Controller('/point')
 export class PointController {
@@ -44,10 +44,10 @@ export class PointController {
   @Patch(':id/charge')
   async charge(
     @Param('id') id,
-    @Body(ValidationPipe) pointDto: PointDto,
+    @Body(ValidationPipe) request: PointRequeset,
   ): Promise<UserPoint> {
     const userId = Number.parseInt(id);
-    const amount = pointDto.amount;
+    const amount = request.amount;
     const point = await this.pointService.charge(userId, amount);
     return point;
   }
@@ -58,10 +58,10 @@ export class PointController {
   @Patch(':id/use')
   async use(
     @Param('id') id,
-    @Body(ValidationPipe) pointDto: PointDto,
+    @Body(ValidationPipe) request: PointRequeset,
   ): Promise<UserPoint> {
     const userId = Number.parseInt(id);
-    const amount = pointDto.amount;
+    const amount = request.amount;
     const point = await this.pointService.use(userId, amount);
     return point;
   }

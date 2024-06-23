@@ -1,23 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PointService, PointServiceImpl } from './point.service';
-import { POINT_REPOSITORY } from './repositories/point.repository';
-import { MockRepository } from './repositories/mock.repository';
 import {
   BadRequestException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { TransactionType, UserPoint } from './point.model';
-import { Repository } from './repositories/repository.interface';
-import {
-  HISTORY_REPOSITORY,
-  HistoryCreateInput,
-} from './repositories/history.repository';
-import { HistoryMockRepository } from './repositories/history.mock.repository';
+import { TransactionType, UserPoint } from '../../domain/models';
+import { HistoryCreateInput, Repository } from '../../domain/repositories';
+import { HistoryRepositoryMock } from '../../infra/repositories/history.repository.mock';
+import InjectionToken from '../../injection.token';
+import { mocks as repositoryMocks } from '../../infra/mocks';
 
 describe('PointService', () => {
   let pointService: PointService;
   let pointRepository: Repository<UserPoint>;
-  let historyRepository: HistoryMockRepository;
+  let historyRepository: HistoryRepositoryMock;
 
   beforeEach(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
@@ -26,20 +22,13 @@ describe('PointService', () => {
           provide: PointService,
           useClass: PointServiceImpl,
         },
-        {
-          provide: POINT_REPOSITORY,
-          useClass: MockRepository,
-        },
-        {
-          provide: HISTORY_REPOSITORY,
-          useClass: HistoryMockRepository,
-        },
+        ...repositoryMocks,
       ],
     }).compile();
 
     pointService = moduleRef.get(PointService);
-    pointRepository = moduleRef.get(POINT_REPOSITORY);
-    historyRepository = moduleRef.get(HISTORY_REPOSITORY);
+    pointRepository = moduleRef.get(InjectionToken.PointRepository);
+    historyRepository = moduleRef.get(InjectionToken.HistoryRepository);
 
     // Stub
     const userPoint: UserPoint = {

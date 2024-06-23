@@ -1,9 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  HISTORY_REPOSITORY,
-  HistoryRepository,
-} from './repositories/history.repository';
-import { PointHistory } from './point.model';
+import { PointHistory } from '../../domain/models';
+import { HistoryRepository } from '../../domain/repositories';
+import InjectionToken from '../../injection.token';
 
 export abstract class HistoryService {
   abstract findAllByUserId(userId: number): Promise<PointHistory[]>;
@@ -12,7 +10,7 @@ export abstract class HistoryService {
 @Injectable()
 export class HistoryServiceImpl implements HistoryService {
   constructor(
-    @Inject(HISTORY_REPOSITORY)
+    @Inject(InjectionToken.HistoryRepository)
     private readonly historyRepository: HistoryRepository,
   ) {}
 

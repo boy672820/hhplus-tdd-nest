@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HistoryService, HistoryServiceImpl } from './history.service';
-import { HistoryMockRepository } from './repositories/history.mock.repository';
-import { HISTORY_REPOSITORY } from './repositories/history.repository';
-import { PointHistory, TransactionType } from './point.model';
+import { PointHistory, TransactionType } from '../../domain/models';
+import InjectionToken from '../../injection.token';
+import { HistoryRepositoryMock } from '../../infra/repositories/history.repository.mock';
+import { historyRepositoryProvider } from '../../infra/mocks';
 
 const histories: PointHistory[] = [
   {
@@ -30,7 +31,7 @@ const histories: PointHistory[] = [
 
 describe('HistoryService', () => {
   let historyService: HistoryService;
-  let historyRepository: HistoryMockRepository;
+  let historyRepository: HistoryRepositoryMock;
 
   beforeEach(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
@@ -39,15 +40,12 @@ describe('HistoryService', () => {
           provide: HistoryService,
           useClass: HistoryServiceImpl,
         },
-        {
-          provide: HISTORY_REPOSITORY,
-          useClass: HistoryMockRepository,
-        },
+        historyRepositoryProvider,
       ],
     }).compile();
 
     historyService = moduleRef.get(HistoryService);
-    historyRepository = moduleRef.get(HISTORY_REPOSITORY);
+    historyRepository = moduleRef.get(InjectionToken.HistoryRepository);
 
     jest
       .spyOn(historyRepository, 'findAllByUserId')

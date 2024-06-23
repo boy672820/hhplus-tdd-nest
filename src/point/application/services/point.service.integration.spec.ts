@@ -1,14 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PointService, PointServiceImpl } from './point.service';
-import { DatabaseModule } from '../database/database.module';
-import {
-  POINT_REPOSITORY,
-  PointRepositoryImpl,
-} from './repositories/point.repository';
-import {
-  HISTORY_REPOSITORY,
-  HistoryRepositoryImpl,
-} from './repositories/history.repository';
+import { DatabaseModule } from '../../../database/database.module';
+import { repositories } from '../../infra';
 
 describe('PointService (Integration)', () => {
   let pointService: PointService;
@@ -21,14 +14,7 @@ describe('PointService (Integration)', () => {
           provide: PointService,
           useClass: PointServiceImpl,
         },
-        {
-          provide: POINT_REPOSITORY,
-          useClass: PointRepositoryImpl,
-        },
-        {
-          provide: HISTORY_REPOSITORY,
-          useClass: HistoryRepositoryImpl,
-        },
+        ...repositories,
       ],
     }).compile();
 

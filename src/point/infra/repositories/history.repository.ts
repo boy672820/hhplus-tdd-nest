@@ -1,23 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { PointHistoryTable } from '../../database/pointhistory.table';
-import { PointHistory, TransactionType } from '../point.model';
-import { Repository } from './repository.interface';
-
-export const HISTORY_REPOSITORY = Symbol();
-
-export interface HistoryCreateInput {
-  userId: number;
-  amount: number;
-  type: TransactionType;
-  timeMillis: number;
-}
-
-export abstract class HistoryRepository implements Repository<PointHistory> {
-  abstract findById(id: number): Promise<PointHistory>;
-  abstract save(model: PointHistory): Promise<PointHistory>;
-  abstract create(input: HistoryCreateInput): Promise<PointHistory>;
-  abstract findAllByUserId(userId: number): Promise<PointHistory[]>;
-}
+import { PointHistoryTable } from '../../../database/pointhistory.table';
+import { PointHistory } from '../../domain/models';
+import {
+  HistoryRepository,
+  HistoryCreateInput,
+} from '../../domain/repositories/history.repository';
 
 @Injectable()
 export class HistoryRepositoryImpl extends HistoryRepository {

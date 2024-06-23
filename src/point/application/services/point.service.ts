@@ -4,14 +4,11 @@ import {
   Injectable,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { Repository } from './repositories/repository.interface';
-import { TransactionType, UserPoint } from './point.model';
-import { POINT_REPOSITORY } from './repositories/point.repository';
-import {
-  HISTORY_REPOSITORY,
-  HistoryRepository,
-} from './repositories/history.repository';
-import { WithLock } from '../lib/decorators';
+import { TransactionType, UserPoint } from '../../domain/models';
+import { WithLock } from '../../../lib/decorators';
+import { Repository } from '../../domain/repositories/repository.interface';
+import InjectionToken from '../../injection.token';
+import { HistoryRepository } from '../../domain/repositories';
 
 export abstract class PointService {
   abstract findById(userId: number): Promise<UserPoint>;
@@ -22,9 +19,9 @@ export abstract class PointService {
 @Injectable()
 export class PointServiceImpl implements PointService {
   constructor(
-    @Inject(POINT_REPOSITORY)
+    @Inject(InjectionToken.PointRepository)
     private readonly pointRepository: Repository<UserPoint>,
-    @Inject(HISTORY_REPOSITORY)
+    @Inject(InjectionToken.HistoryRepository)
     private readonly historyRepository: HistoryRepository,
   ) {}
 
