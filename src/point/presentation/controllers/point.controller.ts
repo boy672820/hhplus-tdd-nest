@@ -6,16 +6,16 @@ import {
   Patch,
   ValidationPipe,
 } from '@nestjs/common';
-import { PointHistory, TransactionType, UserPoint } from './point.model';
-import { UserPointTable } from 'src/database/userpoint.table';
-import { PointHistoryTable } from 'src/database/pointhistory.table';
-import { PointBody as PointDto } from './point.dto';
+import { PointHistory, UserPoint } from '../../domain/models';
+import { PointBody as PointRequeset } from '../requests/point.dto';
+import { PointService } from '../../application/services/point.service';
+import { HistoryService } from '../../application/services/history.service';
 
 @Controller('/point')
 export class PointController {
   constructor(
-    private readonly userDb: UserPointTable,
-    private readonly historyDb: PointHistoryTable,
+    private readonly pointService: PointService,
+    private readonly historyService: HistoryService,
   ) {}
 
   /**
@@ -24,7 +24,8 @@ export class PointController {
   @Get(':id')
   async point(@Param('id') id): Promise<UserPoint> {
     const userId = Number.parseInt(id);
-    return { id: userId, point: 0, updateMillis: Date.now() };
+    const point = await this.pointService.findById(userId);
+    return point;
   }
 
   /**
@@ -33,7 +34,8 @@ export class PointController {
   @Get(':id/histories')
   async history(@Param('id') id): Promise<PointHistory[]> {
     const userId = Number.parseInt(id);
-    return [];
+    const histories = await this.historyService.findAllByUserId(userId);
+    return histories;
   }
 
   /**
@@ -42,11 +44,12 @@ export class PointController {
   @Patch(':id/charge')
   async charge(
     @Param('id') id,
-    @Body(ValidationPipe) pointDto: PointDto,
+    @Body(ValidationPipe) request: PointRequeset,
   ): Promise<UserPoint> {
     const userId = Number.parseInt(id);
-    const amount = pointDto.amount;
-    return { id: userId, point: amount, updateMillis: Date.now() };
+    const amount = request.amount;
+    const point = await this.pointService.charge(userId, amount);
+    return point;
   }
 
   /**
@@ -55,10 +58,11 @@ export class PointController {
   @Patch(':id/use')
   async use(
     @Param('id') id,
-    @Body(ValidationPipe) pointDto: PointDto,
+    @Body(ValidationPipe) request: PointRequeset,
   ): Promise<UserPoint> {
     const userId = Number.parseInt(id);
-    const amount = pointDto.amount;
-    return { id: userId, point: amount, updateMillis: Date.now() };
+    const amount = request.amount;
+    const point = await this.pointService.use(userId, amount);
+    return point;
   }
 }
