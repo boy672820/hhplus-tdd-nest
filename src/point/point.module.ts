@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { controllers } from './presentation';
-import { DatabaseModule } from 'src/database/database.module';
 import { services } from './application';
 import { repositories } from './infra';
+import { DatabaseModule } from '../database/database.module';
 @Module({
   imports: [DatabaseModule],
   providers: [...services, ...repositories],
